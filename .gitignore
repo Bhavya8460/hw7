@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+data/trips.db
+data/calendars/*.ics
+

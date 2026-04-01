@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Trip Budget Operator</title>
+  <link rel="stylesheet" href="/styles.css?v=20260331c">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">MCP Trip Planner</p>
+        <h1>Trip Budget Operator</h1>
+        <p class="hero-copy">
+          Enter a trip on the left. The right side shows how the MCP client orchestrates
+          <code>travel_mcp</code>, <code>budget_mcp</code>, and <code>calendar_mcp</code> over <code>stdio</code>.
+        </p>
+      </div>
+      <div class="hero-note">
+        <p class="hero-label">Flow</p>
+        <p>Browser UI → web app → MCP client → three MCP servers</p>
+        <p class="caption">Create a trip, inspect each MCP response, then export the whole trip as a four-sheet Excel workbook.</p>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="panel controls">
+        <div class="panel-header">
+          <h2>Inputs</h2>
+          <button id="refreshTrips" class="ghost-button" type="button">Refresh trips</button>
+        </div>
+
+        <form id="planForm" class="stack">
+          <h3>Create a trip</h3>
+          <label>Destination
+            <input name="destination" value="Las Vegas" required>
+          </label>
+          <label>Home city
+            <input name="home_city" value="Boise">
+          </label>
+          <div class="two-col">
+            <label>Start date
+              <input type="date" name="start_date" value="2026-04-03" required>
+            </label>
+            <label>End date
+              <input type="date" name="end_date" value="2026-04-07" required>
+            </label>
+          </div>
+          <div class="two-col">
+            <label>Budget (USD)
+              <input type="number" step="0.01" name="budget_usd" value="700" required>
+            </label>
+            <label>Travelers
+              <input type="number" min="1" name="travelers" value="1" required>
+            </label>
+          </div>
+          <label>Notes
+            <textarea name="notes" rows="3" placeholder="Keep it cheap, focus on food and a show."></textarea>
+          </label>
+          <button class="primary-button" type="submit">Plan trip</button>
+        </form>
+
+        <form id="statusForm" class="stack">
+          <h3>Load trip status</h3>
+          <label>Trip ID
+            <input id="statusTripId" name="trip_id" placeholder="Select from saved trips below" required>
+          </label>
+          <button class="secondary-button" type="submit">Check status</button>
+        </form>
+
+        <form id="expenseForm" class="stack">
+          <h3>Add expense</h3>
+          <label>Trip ID
+            <input id="expenseTripId" name="trip_id" required>
+          </label>
+          <div class="two-col">
+            <label>Date
+              <input type="date" name="expense_date" required>
+            </label>
+            <label>Category
+              <input name="category" value="food" required>
+            </label>
+          </div>
+          <div class="two-col">
+            <label>Amount (USD)
+              <input type="number" step="0.01" name="amount_usd" required>
+            </label>
+            <label>Vendor
+              <input name="vendor" placeholder="Cafe or airline">
+            </label>
+          </div>
+          <label>Notes
+            <input name="notes" placeholder="Optional">
+          </label>
+          <button class="secondary-button" type="submit">Save expense</button>
+        </form>
+
+        <section class="saved-trips">
+          <div class="panel-header">
+            <h3>Saved trips</h3>
+            <span id="tripCount" class="count-pill">0</span>
+          </div>
+          <div id="tripList" class="trip-list"></div>
+        </section>
+      </section>
+
+      <section class="panel outputs">
+        <div class="panel-header output-header">
+          <div>
+            <h2>Outputs</h2>
+            <p class="caption">Structured trip intelligence, raw MCP traces, and one-click Excel export.</p>
+          </div>
+          <div class="header-actions">
+            <button id="downloadExcel" class="primary-button" type="button" disabled>Download Excel</button>
+            <span id="statusBadge" class="status-badge">Idle</span>
+          </div>
+        </div>
+
+        <article class="summary-hero">
+          <div>
+            <p class="eyebrow">Trip snapshot</p>
+            <h3 id="summaryHeadline">No request yet.</h3>
+            <p id="summaryLead" class="summary-lead">Create a trip or load a saved one to see each MCP server rendered separately.</p>
+          </div>
+          <div id="summaryTags" class="tag-row"></div>
+        </article>
+
+        <section id="metricGrid" class="metric-grid">
+          <article class="metric-card">
+            <span class="metric-label">Budget</span>
+            <strong class="metric-value">$0.00</strong>
+            <span class="metric-meta">Waiting for a request</span>
+          </article>
+        </section>
+
+        <section class="viz-grid">
+          <article class="result-card spotlight-card">
+            <h3>Trip overview</h3>
+            <div id="overviewBox" class="detail-stack empty-state">Trip details will appear here.</div>
+          </article>
+
+          <article class="result-card mcp-panel travel-panel">
+            <h3>Travel MCP</h3>
+            <div id="travelBox" class="detail-stack empty-state">Destination, weather, transport, and travel estimates will appear here.</div>
+          </article>
+
+          <article class="result-card mcp-panel budget-panel">
+            <h3>Budget MCP</h3>
+            <div id="budgetBox" class="detail-stack empty-state">Budget status, spend pacing, and expense categories will appear here.</div>
+          </article>
+
+          <article class="result-card mcp-panel calendar-panel">
+            <h3>Calendar MCP</h3>
+            <div id="calendarBox" class="detail-stack empty-state">Reminder counts, schedule highlights, and export path will appear here.</div>
+          </article>
+        </section>
+
+        <section class="detail-grid">
+          <article class="result-card">
+            <div class="panel-header">
+              <h3>Expense ledger</h3>
+              <span id="expenseCount" class="count-pill">0</span>
+            </div>
+            <div id="expenseTable" class="table-wrap empty-state">No expenses yet.</div>
+          </article>
+
+          <article class="result-card">
+            <div class="panel-header">
+              <h3>Reminder timeline</h3>
+              <span id="reminderCount" class="count-pill">0</span>
+            </div>
+            <div id="reminderTable" class="table-wrap empty-state">No reminders yet.</div>
+          </article>
+        </section>
+
+        <article class="result-card">
+          <h3>MCP trace</h3>
+          <p class="caption">Each entry shows the MCP tool call envelope and the server response preview.</p>
+          <div id="traceBox" class="trace-box"></div>
+        </article>
+
+        <article class="result-card">
+          <h3>Raw JSON</h3>
+          <pre id="jsonBox" class="json-box">No payload yet.</pre>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js?v=20260331b"></script>
+</body>
+</html>

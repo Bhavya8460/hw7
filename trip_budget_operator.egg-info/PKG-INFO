@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: trip-budget-operator
+Version: 0.1.0
+Summary: A useful MCP application that plans budget-conscious trips using three MCP servers.
+Requires-Python: >=3.12
+Requires-Dist: httpx>=0.28.1
+Requires-Dist: mcp[cli]>=1.26.0
+Requires-Dist: openpyxl>=3.1.5
+Provides-Extra: dev
+Requires-Dist: pytest>=9.0.0; extra == "dev"

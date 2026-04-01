@@ -1,0 +1,2 @@
+[console_scripts]
+trip-operator = trip_operator.cli:main

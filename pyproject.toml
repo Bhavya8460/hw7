@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trip-budget-operator"
+version = "0.1.0"
+description = "A useful MCP application that plans budget-conscious trips using three MCP servers."
+requires-python = ">=3.12"
+dependencies = [
+  "httpx>=0.28.1",
+  "mcp[cli]>=1.26.0",
+  "openpyxl>=3.1.5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.0.0",
+]
+
+[project.scripts]
+trip-operator = "trip_operator.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools]
+packages = ["trip_operator", "mcp_servers"]
