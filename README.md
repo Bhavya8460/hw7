@@ -40,7 +40,7 @@ If those services fail, the app degrades gracefully with local fallbacks.
 
 ```bash
 python3 -m venv .venv
-./.venv/bin/pip install -e ".[dev]"
+./.venv/bin/pip install -e .
 ```
 
 ## Usage

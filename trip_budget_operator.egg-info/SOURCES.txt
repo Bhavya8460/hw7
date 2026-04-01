@@ -4,11 +4,6 @@ mcp_servers/__init__.py
 mcp_servers/budget_server.py
 mcp_servers/calendar_server.py
 mcp_servers/travel_server.py
-tests/test_calendaring.py
-tests/test_reporting.py
-tests/test_storage.py
-tests/test_travel.py
-tests/test_workflows.py
 trip_budget_operator.egg-info/PKG-INFO
 trip_budget_operator.egg-info/SOURCES.txt
 trip_budget_operator.egg-info/dependency_links.txt
